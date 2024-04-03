@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Электронный журнал{% endblock %}</title>
+    <style>
+        body {
+            background-color: #f0f0f0; /* светло-серый цвет фона */
+            color: #333; /* темно-серый цвет текста */
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif; /* выбираем шрифт */
+        }
+        header {
+            background-color: #fff; /* голубой цвет фона */
+            color: #ffffff; /* белый цвет текста */
+            padding: 10px;
+            text-align: left; /* выравнивание текста по левому краю */
+            position: relative;
+        }
+        h1 {
+            font-size: 24px; /* уменьшаем размер заголовка */
+            margin: 0; /* убираем отступы */
+        }
+        h1 a {
+            color: inherit; /* наследуем цвет текста от родительского элемента */
+            text-decoration: none; /* убираем подчеркивание */
+        }
+        .login-button,
+        .register-button {
+            background-color: #008CBA; /* голубой цвет фона */
+            color: #fff; /* белый цвет текста */
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            position: absolute;
+            top: 50%; /* размещаем по вертикали по центру */
+            transform: translateY(-50%); /* корректируем положение по вертикали */
+        }
+        .login-button {
+            right: 20px; /* отступ справа */
+        }
+        .register-button {
+            right: 140px; /* увеличиваем отступ справа */
+        }
+        .login-button:hover,
+        .register-button:hover {
+            background-color: #005f6b; /* темно-голубой при наведении */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="{% url 'home' %}"><img src="/static/128.png"></a></h1>
+        <a href="{% url 'login' %}" class="login-button">Войти</a>
+        <a href="{% url 'registration' %}" class="register-button">Регистрация</a>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+        </ul>
+    </nav>
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+    <footer>
+        <p>&copy; 2024 Electronic Journal</p>
+    </footer>
+</body>
+</html>

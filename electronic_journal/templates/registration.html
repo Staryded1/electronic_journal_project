@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Регистрация - Electronic Journal
+{% endblock %}
+
+{% block content %}
+    <style>
+    /* Добавляем стили для формы регистрации */
+    .registration-form-container {
+        max-width: 400px;
+        margin: 20px auto 0 auto; /* Добавлен верхний отступ в 20 пикселей */
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    .form-control {
+        width: calc(100% - 22px); /* Уменьшаем ширину на 22 пикселя */
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    /* Стили для плашки с контактной информацией */
+    .contact-info {
+        background-color: #008CBA; /* Голубой цвет фона */
+        color: #fff; /* Белый цвет текста */
+        padding: 10px; /* Уменьшаем внутренние отступы */
+        text-align: center;
+        margin-top: 25px; /* Уменьшаем отступ сверху */
+        font-size: 14px; /* Уменьшаем размер шрифта */
+    }
+
+    /* Скрыть ненужные ссылки */
+    nav {
+        display: none;
+    }
+    </style>
+
+    <div class="registration-form-container">
+        <h2>Регистрация</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="last_name">Фамилия:</label>
+                <input type="text" id="last_name" name="last_name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="first_name">Имя:</label>
+                <input type="text" id="first_name" name="first_name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="username">Логин:</label>
+                <input type="text" id="username" name="username" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+        </form>
+    </div>
+
+    <!-- Плашка с контактной информацией -->
+    <div class="contact-info">
+        <h2>Контактная информация</h2>
+        <p>Телефон: +123456789</p>
+        <p>Email: info@example.com</p>
+        <p>Адрес: г. Вашингтон, ул. Примерная, д. 123</p>
+    </div>
+{% endblock %}
