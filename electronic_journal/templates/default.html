@@ -13,8 +13,8 @@
             font-family: Arial, sans-serif; /* выбираем шрифт */
         }
         header {
-            background-color: #fff; /* голубой цвет фона */
-            color: #ffffff; /* белый цвет текста */
+            background-color: #fff; /* белый цвет фона */
+            color: #333; /* темно-серый цвет текста */
             padding: 10px;
             text-align: left; /* выравнивание текста по левому краю */
             position: relative;
@@ -27,8 +27,8 @@
             color: inherit; /* наследуем цвет текста от родительского элемента */
             text-decoration: none; /* убираем подчеркивание */
         }
-        .login-button,
-        .register-button {
+        .logout-button,
+        .settings-button {
             background-color: #0173b3; /* голубой цвет фона */
             color: #fff; /* белый цвет текста */
             padding: 10px 20px;
@@ -36,26 +36,20 @@
             border-radius: 5px;
             text-decoration: none;
             position: absolute;
-            top: 50%; /* размещаем по вертикали по центру */
-            transform: translateY(-50%); /* корректируем положение по вертикали */
+            top: 20px; /* размещаем в верхнем краю */
+            right: 20px; /* размещаем в правом краю */
         }
-        .login-button {
-            right: 20px; /* отступ справа */
-        }
-        .register-button {
-            right: 140px; /* увеличиваем отступ справа */
-        }
-        .login-button:hover,
-        .register-button:hover {
+        .logout-button:hover,
+        .settings-button:hover {
             background-color: #005f6b; /* темно-голубой при наведении */
         }
     </style>
 </head>
 <body>
     <header>
-        <h1><a href="{% url 'home' %}"><img src="/static/64.png"></a></h1>
-        <a href="{% url 'login' %}" class="login-button">Войти</a>
-        <a href="{% url 'registration' %}" class="register-button">Регистрация</a>
+        <h1><a href="{% url 'dashboard' %}"><img src="/static/64.png"></a></h1>
+        <a href="{% url 'logout' %}" class="logout-button">Выйти</a>
+   
     </header>
     <main>
         {% block content %}

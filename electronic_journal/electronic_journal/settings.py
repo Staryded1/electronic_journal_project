@@ -76,8 +76,12 @@ WSGI_APPLICATION = 'electronic_journal.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'admin1',
+        'HOST': 'localhost',  # Или IP-адрес вашего сервера PostgreSQL
+        'PORT': '5432',  # Порт по умолчанию для PostgreSQL
     }
 }
 

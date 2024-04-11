@@ -47,7 +47,7 @@
 
     /* Стили для плашки с контактной информацией */
     .contact-info {
-        background-color: #008CBA; /* Голубой цвет фона */
+        background-color: #0173b3; /* Голубой цвет фона */
         color: #fff; /* Белый цвет текста */
         padding: 10px; /* Уменьшаем внутренние отступы */
         text-align: center;
@@ -61,35 +61,39 @@
     }
     </style>
 
-    <div class="registration-form-container">
-        <h2>Регистрация</h2>
-        <form method="post">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="last_name">Фамилия:</label>
-                <input type="text" id="last_name" name="last_name" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="first_name">Имя:</label>
-                <input type="text" id="first_name" name="first_name" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="username">Логин:</label>
-                <input type="text" id="username" name="username" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Пароль:</label>
-                <input type="password" id="password" name="password" class="form-control" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
-        </form>
-    </div>
+<div class="registration-form-container">
+    <h2>Регистрация</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="last_name">Фамилия:</label>
+            <input type="text" id="last_name" name="last_name" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="first_name">Имя:</label>
+            <input type="text" id="first_name" name="first_name" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="username">Логин:</label>
+            <input type="text" id="username" name="username" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+    </form>
+</div>
 
     <!-- Плашка с контактной информацией -->
     <div class="contact-info">
         <h2>Контактная информация</h2>
         <p>Телефон: +123456789</p>
         <p>Email: info@example.com</p>
-        <p>Адрес: г. Вашингтон, ул. Примерная, д. 123</p>
+        <p>Адрес: г. Новосибирск, ул. Красный проспект, д. 72</p>
     </div>
 {% endblock %}
