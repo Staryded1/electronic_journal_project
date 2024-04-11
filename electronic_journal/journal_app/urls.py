@@ -7,4 +7,7 @@ urlpatterns = [
     path('login/', views.login, name='login'),  # Страница входа
     path('dashboard/', views.dashboard, name='dashboard'),  # Страница dashboard
     path('logout/', views.logout_view, name='logout'),
+    path('grades/', views.grades, name='grades'),
+    path('settings/', views.settings, name='settings'),
+    path('mark/', views.mark, name='mark'),
 ]
