@@ -1,0 +1,48 @@
+{% extends 'admin_panel.html' %}
+
+{% block title %}
+    Добавление студентов
+{% endblock %}
+
+{% block content %}
+    <style>
+        /* Стили для формы */
+        .admin-panel form {
+            margin-top: 20px;
+        }
+
+        .admin-panel form label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .admin-panel form input[type="file"] {
+            margin-top: 5px;
+        }
+
+        .admin-panel form button[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+
+    <div class="admin-panel">
+        <h2>Добавить студентов</h2>
+        {% if messages %}
+            {% for message in messages %}
+                <div>{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="excel_file">Загрузить файл Excel:</label>
+            <input type="file" name="excel_file" id="excel_file">
+            <input type="hidden" name="group_id" value="{{ group_id }}"> <!-- Скрытое поле для передачи ID группы -->
+            <button type="submit">Добавить</button>
+        </form>
+    </div>
+{% endblock %}

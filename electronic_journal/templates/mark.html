@@ -59,6 +59,33 @@
         .mark-button:hover {
             background-color: #005f6b; /* темно-голубой при наведении */
         }
+        .form-container {
+            margin-top: 50px;
+            text-align: center;
+        }
+        .form-label {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .form-select {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        .submit-button {
+            background-color: #0173b3;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .submit-button:hover {
+            background-color: #005f6b;
+        }
     </style>
 </head>
 <body>
@@ -74,7 +101,7 @@
     <main>
         {% block content %}
             <div class="form-container">
-                <form method="POST">
+                <form method="POST" action="{% url 'department_selection' %}">
                     {% csrf_token %}
                     <p class="form-label">Выберите форму обучения:</p>
                     <select class="form-select" name="education_form">

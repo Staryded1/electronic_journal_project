@@ -1,0 +1,88 @@
+{% extends 'admin_panel.html' %}
+
+{% block title %}
+    Добавление группы
+{% endblock %}
+
+{% block content %}
+    <style>
+        .admin-panel {
+            margin: 0 auto;
+            width: 50%;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            margin-top: 5px;
+        }
+
+        .form-group input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            margin-top: 5px;
+            font-size: 16px; /* Размер шрифта */
+            line-height: 1.5; /* Межстрочный интервал */
+        }
+
+        .button-primary {
+            background-color: #007bff;
+            color: #fff;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+    
+    <div class="admin-panel">
+        <h2>Добавить группу</h2>
+        {% if messages %}
+            {% for message in messages %}
+                <div>{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        <form method="post" class="form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="specialty">Выберите специальность:</label>
+                <select id="specialty" name="specialty">
+                    {% for specialty in specialties %}
+                        <option value="{{ specialty.id }}">{{ specialty.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="name">Название группы:</label>
+                <input type="text" id="name" name="name">
+            </div>
+            <button type="submit" class="button-primary">Добавить</button>
+        </form>
+        <div id="credentialsOutput" class="output">
+            {% if messages %}
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

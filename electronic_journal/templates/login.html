@@ -83,32 +83,30 @@
     }
     </style>
 
-    <div class="login-form-container">
-        <h2>Вход</h2>
-        <form method="post">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="username">Логин:</label>
-                <input type="text" id="username" name="username" class="form-control" required>
+<div class="login-form-container">
+    <h2>Вход</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="username">Логин:</label>
+            <input type="text" id="username" name="username" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" class="form-control" required>
+            <div class="forgot-password">
+                <a>Забыли пароль?</a>
             </div>
-            <div class="form-group">
-                <label for="password">Пароль:</label>
-                <input type="password" id="password" name="password" class="form-control" required>
-                <div class="forgot-password">
-                    <a >Забыли пароль?</a>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary">Войти</button>
-        </form>
-    </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Войти</button>
+    </form>
+</div>
 
-    <!-- Плашка с контактной информацией -->
-    <div class="contact-info">
-        <h2>Контактная информация</h2>
-        <p>Телефон: +123456789</p>
-        <p>Email: info@example.com</p>
-        <p>Адрес: г. Новосибирск, ул. Красный проспект, д. 72</p>
-    </div>
+<div class="contact-info">
+    <h2>Контактная информация</h2>
+    <p>Телефон: +123456789</p>
+    <p>Email: info@example.com</p>
+    <p>Адрес: г. Новосибирск, ул. Красный проспект, д. 72</p>
+</div>
 
-   
 {% endblock %}

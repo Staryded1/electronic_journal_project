@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Выбор отделения{% endblock %}</title>
+    <style>
+        body {
+            background-color: #f0f0f0; /* светло-серый цвет фона */
+            color: #333; /* темно-серый цвет текста */
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif; /* выбираем шрифт */
+        }
+        header {
+            background-color: #fff; /* белый цвет фона */
+            color: #333; /* темно-серый цвет текста */
+            padding: 10px;
+            text-align: left; /* выравнивание текста по левому краю */
+            position: relative;
+        }
+        h1 {
+            font-size: 24px; /* уменьшаем размер заголовка */
+            margin: 0; /* убираем отступы */
+        }
+        h1 a {
+            color: inherit; /* наследуем цвет текста от родительского элемента */
+            text-decoration: none; /* убираем подчеркивание */
+        }
+        .logout-button,
+        .settings-button,
+        .grades-button,
+        .mark-button {
+            background-color: #0173b3; /* голубой цвет фона */
+            color: #fff; /* белый цвет текста */
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            position: absolute;
+            top: 20px; /* размещаем в верхнем краю */
+        }
+        .logout-button {
+            right: 20px; /* размещаем в правом краю */
+        }
+        .settings-button {
+            right: 140px; /* размещаем в правом краю, немного левее кнопки Выйти */
+        }
+        .grades-button {
+            left: 120px; /* прижимаем к правому краю */
+            top: 20px; /* прижимаем к верху */
+        }
+        .mark-button {
+            left: 310px; /* прижимаем к левому краю */
+        }
+        .logout-button:hover,
+        .settings-button:hover,
+        .grades-button:hover,
+        .mark-button:hover {
+            background-color: #005f6b; /* темно-голубой при наведении */
+        }
+        .form-container {
+            margin-top: 50px;
+            text-align: center;
+        }
+        .form-label {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .form-select {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        .submit-button {
+            background-color: #0173b3;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .submit-button:hover {
+            background-color: #005f6b;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="{% url 'dashboard' %}"><img src="/static/64.png"></a></h1>
+        <a href="{% url 'logout' %}" class="logout-button">Выйти</a>
+        <a href="{% url 'settings' %}" class="settings-button">Настройки</a>
+        <a href="{% url 'grades' %}" class="grades-button">Посмотреть оценки</a>
+        {% if is_teacher or is_admin %}
+            <a href="{% url 'mark' %}" class="mark-button">Выставить оценки</a>
+        {% endif %}
+    </header>
+    <main>
+        {% block content %}
+            <div class="form-container">
+                <form method="POST" action>
+                    {% csrf_token %}
+                    <p class="form-label">Выберите программу обучения:</p>
+                    <select class="form-select" name="department">
+                        <option value="09.02.01">Компьютерные системы и комплексы</option>
+                        <option value="09.02.07">Информационные системы и программирование</option>
+                        <option value="11.02.01">Радиоаппаратостроение</option>
+                        <option value="11.02.02">Техническое обслуживание и ремонт радиоэлектронной техники (по отраслям)</option>
+                        <option value="11.02.04">Радиотехнические комплексы и системы управления космических летательных аппаратов</option>
+                        <option value="11.02.06">Техническая эксплуатация транспортного радиоэлектронного оборудования (по видам транспорта)</option>
+                        <option value="11.02.16">Монтаж, техническое обслуживание и ремонт электронных приборов и устройств</option>
+                        <option value="11.02.17">Разработка электронных устройств и систем</option>
+                        <option value="12.02.09">Производство и эксплуатация оптических и оптико-электронных приборов и систем</option>
+                        <option value="15.02.08">Технология машиностроения</option>
+                        <option value="15.02.09">Аддитивные технологии</option>
+                        <option value="15.02.12">Монтаж, техническое обслуживание и ремонт промышленного оборудования (по отраслям)</option>
+                        <option value="15.02.16">Технология машиностроения</option>
+                        <option value="25.02.03">Техническая эксплуатация электрифицированных и пилотажно-навигационных комплексов</option>
+                        <option value="25.02.06">Производство и обслуживание авиационной техники</option>
+                        <option value="25.02.08">Эксплуатация беспилотных авиационных систем</option>
+                        <option value="31.02.04">Медицинская оптика</option>
+                        <!-- Добавьте свои варианты отделений здесь -->
+                    </select>
+                    <button type="submit" class="submit-button">Продолжить</button>
+                </form>
+            </div>
+        {% endblock %}
+    </main>
+    <footer>
+        <p>&copy; 2024 Electronic Journal</p>
+    </footer>
+</body>
+</html>

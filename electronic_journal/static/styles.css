@@ -58,3 +58,43 @@ label {
 .btn-primary:hover {
     background-color: #0056b3;
 }
+
+.admin-panel {
+    margin: 0 auto;
+    width: 50%; /* или другой подходящий размер */
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px; /* увеличиваем padding */
+    border-radius: 10px; /* закругляем углы */
+    border: 1px solid #ccc;
+    box-sizing: border-box; /* учитываем padding и border в общей ширине элемента */
+    margin-top: 5px; /* добавляем небольшое расстояние между полями */
+    margin-bottom: 15px; /* добавляем небольшое расстояние между полями */
+}
+
+.button-primary {
+    background-color: #007bff;
+    color: #fff;
+    padding: 12px 24px; /* увеличиваем padding */
+    border: none;
+    border-radius: 10px; /* закругляем углы */
+    cursor: pointer;
+}
+
+.output {
+    margin-top: 20px;
+}
