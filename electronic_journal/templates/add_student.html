@@ -13,14 +13,19 @@
 
         .admin-panel form label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 10px; /* Увеличил расстояние между метками и полями */
         }
 
         .admin-panel form input[type="file"] {
-            margin-top: 5px;
+            margin-top: 10px; /* Увеличил расстояние между полем для файла и кнопкой */
+        }
+
+        .admin-panel form select {
+            margin-top: 10px; /* Увеличил расстояние между полем выбора группы и кнопкой */
         }
 
         .admin-panel form button[type="submit"] {
+            margin-top: 10px; /* Увеличил расстояние между полем выбора группы и кнопкой */
             background-color: #007bff;
             color: #fff;
             padding: 12px 24px;
@@ -41,7 +46,15 @@
             {% csrf_token %}
             <label for="excel_file">Загрузить файл Excel:</label>
             <input type="file" name="excel_file" id="excel_file">
-            <input type="hidden" name="group_id" value="{{ group_id }}"> <!-- Скрытое поле для передачи ID группы -->
+            
+            <!-- Добавлено поле выбора группы -->
+            <label for="group">Выберите группу:</label>
+            <select name="group_id" id="group">
+                {% for group in groups %}
+                    <option value="{{ group.id }}">{{ group.name }}</option>
+                {% endfor %}
+            </select>
+            
             <button type="submit">Добавить</button>
         </form>
     </div>

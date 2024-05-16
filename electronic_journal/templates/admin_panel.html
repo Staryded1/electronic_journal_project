@@ -29,6 +29,7 @@
             border-radius: 5px;
             cursor: pointer;
             margin-right: 10px;
+            text-decoration: none;
         }
         .button-primary:hover {
             background-color: #005f6b;
@@ -37,10 +38,12 @@
 </head>
 <body>
     <div class="header">
-        <h1>Администраторская панель</h1>
+        <h1>Панель администратора</h1>
         <a href="{% url 'add_specialty' %}" class="button-primary">Добавить специальность</a>
         <a href="{% url 'add_group' %}" class="button-primary">Добавить группу</a>
-        <a href="{% url 'add_student' %}" class="button-primary">Добавить студента</a> <!-- Добавленная кнопка -->
+        <a href="{% url 'add_student' %}" class="button-primary">Добавить студентов</a>
+        <a href="{% url 'add_teacher' %}" class="button-primary">Добавить преподавателя</a> <!-- Добавленная кнопка -->
+        <a href="{% url 'create_journal' %}" class="button-primary">Создать журнал</a>
     </div>
     <div class="container">
         {% block content %}

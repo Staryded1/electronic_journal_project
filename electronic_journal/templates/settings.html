@@ -133,9 +133,9 @@
             <form id="settings-form" method="post">
                 {% csrf_token %}
                 <label for="first_name" class="form-label">Имя:</label>
-                <input type="text" id="first_name" name="first_name" class="form-input" value="{{ user.first_name }}" disabled>
+                <input type="text" id="first_name" name="first_name" class="form-input" value="{{ user.first_name }}" required>
                 <label for="last_name" class="form-label">Фамилия:</label>
-                <input type="text" id="last_name" name="last_name" class="form-input" value="{{ user.last_name }}" disabled>
+                <input type="text" id="last_name" name="last_name" class="form-input" value="{{ user.last_name }}" required>
                 <label for="email" class="form-label">Email:</label>
                 <input type="email" id="email" name="email" class="form-input" value="{{ user.email }}" required>
                 <button type="submit" class="submit-button">Сохранить</button>

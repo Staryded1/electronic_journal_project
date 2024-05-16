@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Выбор отделения{% endblock %}</title>
+    <title>{% block title %}Выбор специальности{% endblock %}</title>
     <style>
         body {
             background-color: #f0f0f0; /* светло-серый цвет фона */
@@ -101,28 +101,13 @@
     <main>
         {% block content %}
             <div class="form-container">
-                <form method="POST" action>
+                <form method="POST" action="{% url 'group_selection' %}">
                     {% csrf_token %}
-                    <p class="form-label">Выберите программу обучения:</p>
-                    <select class="form-select" name="department">
-                        <option value="09.02.01">Компьютерные системы и комплексы</option>
-                        <option value="09.02.07">Информационные системы и программирование</option>
-                        <option value="11.02.01">Радиоаппаратостроение</option>
-                        <option value="11.02.02">Техническое обслуживание и ремонт радиоэлектронной техники (по отраслям)</option>
-                        <option value="11.02.04">Радиотехнические комплексы и системы управления космических летательных аппаратов</option>
-                        <option value="11.02.06">Техническая эксплуатация транспортного радиоэлектронного оборудования (по видам транспорта)</option>
-                        <option value="11.02.16">Монтаж, техническое обслуживание и ремонт электронных приборов и устройств</option>
-                        <option value="11.02.17">Разработка электронных устройств и систем</option>
-                        <option value="12.02.09">Производство и эксплуатация оптических и оптико-электронных приборов и систем</option>
-                        <option value="15.02.08">Технология машиностроения</option>
-                        <option value="15.02.09">Аддитивные технологии</option>
-                        <option value="15.02.12">Монтаж, техническое обслуживание и ремонт промышленного оборудования (по отраслям)</option>
-                        <option value="15.02.16">Технология машиностроения</option>
-                        <option value="25.02.03">Техническая эксплуатация электрифицированных и пилотажно-навигационных комплексов</option>
-                        <option value="25.02.06">Производство и обслуживание авиационной техники</option>
-                        <option value="25.02.08">Эксплуатация беспилотных авиационных систем</option>
-                        <option value="31.02.04">Медицинская оптика</option>
-                        <!-- Добавьте свои варианты отделений здесь -->
+                    <p class="form-label">Выберите специальность:</p>
+                    <select class="form-select" name="specialty">
+                        {% for specialty in specialties %}
+                            <option value="{{ specialty.code }}">{{ specialty.name }}</option>
+                        {% endfor %}
                     </select>
                     <button type="submit" class="submit-button">Продолжить</button>
                 </form>

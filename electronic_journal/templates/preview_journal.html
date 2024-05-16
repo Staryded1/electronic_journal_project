@@ -1,0 +1,35 @@
+{% extends 'admin_panel.html' %}
+
+{% block title %}
+    Предварительный просмотр журнала
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Предварительный просмотр журнала</h1>
+        {% if journal_entries %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Студент</th>
+                        <th>Дата</th>
+                        <th>Оценка</th>
+                        <!-- Добавьте другие необходимые заголовки -->
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in journal_entries %}
+                        <tr>
+                            <td>{{ entry.student }}</td>
+                            <td>{{ entry.date }}</td>
+                            <td>{{ entry.grade }}</td>
+                            <!-- Добавьте другие необходимые поля -->
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>{{ empty_message }}</p>
+        {% endif %}
+    </div>
+{% endblock %}
