@@ -8,28 +8,75 @@
     <div class="container">
         <h1>Предварительный просмотр журнала</h1>
         {% if journal_entries %}
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Студент</th>
-                        <th>Дата</th>
-                        <th>Оценка</th>
-                        <!-- Добавьте другие необходимые заголовки -->
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for entry in journal_entries %}
+            <form id="journalForm" method="post">
+                {% csrf_token %}
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td>{{ entry.student }}</td>
-                            <td>{{ entry.date }}</td>
-                            <td>{{ entry.grade }}</td>
-                            <!-- Добавьте другие необходимые поля -->
+                            <th>Студент</th>
+                            <th>Год</th>
+                            <th>Месяц</th>
+                            <th>День</th>
+                            <th>Оценка</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for entry in journal_entries %}
+                            <tr>
+                                <td>{{ entry.student }}</td>
+                                <td>
+                                    <input type="number" name="year_{{ entry.id }}" value="{{ entry.year }}" />
+                                </td>
+                                <td>
+                                    <select name="month_{{ entry.id }}">
+                                        <option value="1" {% if entry.month == 1 %}selected{% endif %}>Январь</option>
+                                        <option value="2" {% if entry.month == 2 %}selected{% endif %}>Февраль</option>
+                                        <option value="3" {% if entry.month == 3 %}selected{% endif %}>Март</option>
+                                        <option value="4" {% if entry.month == 4 %}selected{% endif %}>Апрель</option>
+                                        <option value="5" {% if entry.month == 5 %}selected{% endif %}>Май</option>
+                                        <option value="6" {% if entry.month == 6 %}selected{% endif %}>Июнь</option>
+                                        <option value="7" {% if entry.month == 7 %}selected{% endif %}>Июль</option>
+                                        <option value="8" {% if entry.month == 8 %}selected{% endif %}>Август</option>
+                                        <option value="9" {% if entry.month == 9 %}selected{% endif %}>Сентябрь</option>
+                                        <option value="10" {% if entry.month == 10 %}selected{% endif %}>Октябрь</option>
+                                        <option value="11" {% if entry.month == 11 %}selected{% endif %}>Ноябрь</option>
+                                        <option value="12" {% if entry.month == 12 %}selected{% endif %}>Декабрь</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="number" name="day_{{ entry.id }}" value="{{ entry.day }}" />
+                                </td>
+                                <td>
+                                    <input type="text" name="grade_{{ entry.id }}" value="{{ entry.mark }}" />
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+            </form>
         {% else %}
             <p>{{ empty_message }}</p>
         {% endif %}
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('journalForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+                fetch("{% url 'preview_journal' discipline=discipline.id group_id=group_id %}", {
+                    method: 'POST',
+                    body: new FormData(this),
+                }).then(response => {
+                    if (response.ok) {
+                        alert('Журнал успешно сохранен!');
+                        window.close();
+                        window.opener.location.reload(); // Перезагрузить страницу с созданием журнала
+                    } else {
+                        alert('Ошибка при сохранении журнала.');
+                    }
+                });
+            });
+        });
+    </script>
 {% endblock %}

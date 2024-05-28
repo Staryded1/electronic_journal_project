@@ -70,7 +70,7 @@
        
         {% if request.user.is_authenticated %}
         {% if is_teacher or is_admin %}
-            <a href="{% url 'mark' %}" class="mark-button">Выставить оценки</a>
+            <a href="{% url 'department_selection' %}" class="mark-button">Выставить оценки</a>
         {% endif %}
         {% endif %}
        

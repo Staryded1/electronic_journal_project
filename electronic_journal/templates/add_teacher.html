@@ -24,13 +24,19 @@
             margin-bottom: 5px;
         }
 
-        .form-group input {
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
             width: calc(100% - 22px);
             padding: 10px;
             border-radius: 8px;
             border: 1px solid #ccc;
             box-sizing: border-box;
             margin-top: 5px;
+        }
+
+        .form-group .form-control {
+            width: 100%;
         }
 
         .button-primary {
@@ -62,6 +68,10 @@
             <div class="form-group">
                 <label for="{{ form.email.id_for_label }}">Электронная почта:</label>
                 {{ form.email }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.disciplines.id_for_label }}">Дисциплины:</label>
+                {{ form.disciplines }}
             </div>
             <button type="submit" class="button-primary">Добавить</button>
         </form>

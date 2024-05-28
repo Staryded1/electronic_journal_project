@@ -28,27 +28,32 @@ class Student(models.Model):
     def __str__(self):
         return f"{self.last_name} {self.first_name} {self.middle_name or ''}"
     
-class Teacher(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
-    email = models.EmailField(unique=True)
-    password = models.CharField(max_length=100, null=True)
-
-    def __str__(self):
-        return f"{self.first_name} {self.last_name}"
-    
 class Discipline(models.Model):
     name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
 
-class JournalEntry(models.Model):
-    discipline = models.ForeignKey(Discipline, on_delete=models.CASCADE)
-    date = models.DateField()
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    mark = models.CharField(max_length=1)  # Предполагается, что это оценка в формате A, B, C и т. д.
+class Teacher(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=100, null=True)
+    disciplines = models.ManyToManyField('Discipline', related_name='teachers')
 
     def __str__(self):
-        return f"{self.discipline} - {self.date} - {self.student.full_name}"    
+        return f'{self.first_name} {self.last_name}'
+
+
+class JournalEntry(models.Model):
+    discipline = models.ForeignKey(Discipline, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    day = models.IntegerField(null=True, blank=True)
+    month = models.IntegerField(null=True, blank=True)
+    year = models.IntegerField(null=True, blank=True)
+    mark = models.IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.student} - {self.discipline}'

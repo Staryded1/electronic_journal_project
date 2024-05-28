@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse
-from .forms import SpecialtyForm  # Импорт вашей формы для специальностей
+from .forms import DisciplineForm, SpecialtyForm  # Импорт вашей формы для специальностей
 from .models import Specialty, Teacher  # Импорт вашей модели для специальностей
 from django.contrib.admin.views.decorators import staff_member_required
 from .forms import GroupForm, StudentForm
@@ -28,39 +28,13 @@ from .forms import JournalCreationForm
 from openpyxl import Workbook
 from django.http import HttpResponse
 from django.utils.encoding import force_str
-
-
+from django.contrib.auth.decorators import user_passes_test
 
 
 
 def home(request):
     return render(request, 'home.html')
 
-def registration(request):
-    if request.method == 'POST':
-        last_name = request.POST.get('last_name')
-        first_name = request.POST.get('first_name')
-        email = request.POST.get('email')  
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-
-        try:
-            user = User.objects.create_user(username=username, password=password, email=email, last_name=last_name, first_name=first_name)
-            
-            # Определяем роль пользователя как студента и добавляем его в соответствующую группу
-            student_group = Group.objects.get_or_create(name='student')[0]
-            user.groups.add(student_group)
-
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                auth_login(request, user)
-                return redirect('home')
-            else:
-                return render(request, 'registration.html', {'error_message': 'Ошибка при авторизации'})
-        except IntegrityError:
-            return render(request, 'registration.html', {'error_message': 'Пользователь с таким именем уже существует'})
-
-    return render(request, 'registration.html')
 
 def login(request):
     if request.method == 'POST':
@@ -120,20 +94,7 @@ def logout_view(request):
     logout(request)
     return redirect('home')
 
-@login_required
-def mark(request):
-    is_teacher = request.user.groups.filter(name='teacher').exists()
-    is_admin = request.user.groups.filter(name='admin').exists()
-    
-    if request.method == 'POST':
-        # Process the form submission here if needed
-        # Then redirect to the department selection page
-        return redirect(reverse('department_selection'))
-    
-    if request.user.is_authenticated and (is_teacher or is_admin):
-        return render(request, 'mark.html', {'is_teacher': is_teacher, 'is_admin': is_admin})
-    else:
-        return HttpResponseForbidden("Доступ запрещен")
+
 
 @login_required
 def department_selection(request):
@@ -311,6 +272,20 @@ def generate_password():
     return password
 
 
+@staff_member_required
+def add_discipline(request):
+    if request.method == 'POST':
+        form = DisciplineForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Дисциплина успешно добавлена.')
+            return redirect('add_discipline')
+    else:
+        form = DisciplineForm()
+    
+    return render(request, 'add_discipline.html', {'form': form})
+
+@staff_member_required
 def add_teacher(request):
     if request.method == 'POST':
         form = TeacherForm(request.POST)
@@ -319,16 +294,28 @@ def add_teacher(request):
             password = generate_password()  # Генерируем пароль
             teacher_role_group, created = AuthGroup.objects.get_or_create(name='teacher')  # Получаем или создаем группу ролей "teacher"
             try:
-                user = User.objects.create_user(username=email, email=email, password=password)  # Создаем пользователя с email в качестве логина
-                teacher = Teacher.objects.create(
-                    user=user,
-                    first_name=form.cleaned_data['first_name'],
-                    last_name=form.cleaned_data['last_name'],
-                    email=email,
-                    password=password  # Сохраняем пароль в модели Teacher без хеширования
-                )
-                user.groups.add(teacher_role_group)  # Добавляем пользователя в группу "teacher"
-                messages.success(request, f'Преподаватель успешно добавлен. Логин: {email}, Пароль: {password}')
+                # Создаем преподавателя
+                teacher = form.save(commit=False)
+                if not User.objects.filter(username=email).exists():
+                    # Создаем пользователя
+                    user = User.objects.create_user(
+                        username=email,
+                        email=email,
+                        password=password,
+                        first_name=form.cleaned_data['first_name'],
+                        last_name=form.cleaned_data['last_name']
+                    )
+                    teacher.user = user
+                    teacher.password = password  # Сохраняем пароль в модели Teacher без хеширования
+                    teacher.save()
+                    form.save_m2m()  # Сохраняем связи many-to-many для дисциплин
+
+                    # Добавляем пользователя в группу "teacher"
+                    user.groups.add(teacher_role_group)
+                    
+                    messages.success(request, f'Преподаватель успешно добавлен. Логин: {email}, Пароль: {password}')
+                else:
+                    messages.error(request, f'Пользователь с email {email} уже существует.')
                 return HttpResponseRedirect('/add_teacher/')  # Redirect to the add_teacher page
             except Exception as e:
                 messages.error(request, f'Ошибка при добавлении преподавателя: {e}')
@@ -349,42 +336,68 @@ def generate_excel_journal(journal_entries):
 
     return wb
 
+@user_passes_test(lambda u: u.is_staff)
 def create_journal(request):
-    groups = Group.objects.all()  # Получаем список всех групп
+    groups = Group.objects.all()
 
     if request.method == 'POST':
         form = JournalCreationForm(request.POST)
         if form.is_valid():
             discipline = form.cleaned_data['discipline']
-            date = form.cleaned_data['date']
-            group_id = form.cleaned_data['group']  # Получаем ID выбранной группы
-            group = get_object_or_404(Group, id=group_id)  # Получаем объект группы по ID
-            students = group.student_set.all()  # Получаем всех студентов выбранной группы
+            group = form.cleaned_data['group']
+            teacher = form.cleaned_data['teacher']
+            students = group.student_set.all()
+
+            # Удаляем существующие записи для предотвращения дублирования
+            JournalEntry.objects.filter(discipline=discipline, student__in=students).delete()
+
+            # Создаем новые записи с значениями по умолчанию
             for student in students:
-                JournalEntry.objects.create(discipline=discipline, date=date, student=student)
-            # После создания журнала перенаправляем на страницу предварительного просмотра
-            return redirect(reverse('preview_journal', kwargs={'discipline': discipline, 'group_id': group_id}))
+                JournalEntry.objects.create(
+                    discipline=discipline,
+                    student=student,
+                    teacher=teacher,
+                    day=1,  # Значение по умолчанию для day
+                    month=1,  # Значение по умолчанию для month
+                    year=2023,  # Значение по умолчанию для year
+                    mark=0  # Значение по умолчанию для mark
+                )
+
+            # Перенаправляем на страницу предварительного просмотра журнала
+            return redirect(reverse('preview_journal', kwargs={'discipline': discipline.id, 'group_id': group.id}))
+        else:
+            return render(request, 'create_journal.html', {'form': form, 'groups': groups, 'error_message': 'Форма невалидна.'})
     else:
         form = JournalCreationForm()
-    
+
     return render(request, 'create_journal.html', {'form': form, 'groups': groups})
 
-def preview_journal(request, discipline=None, group_id=None):
-    if discipline is not None and group_id is not None:
-        journal_entries = JournalEntry.objects.filter(discipline=discipline, student__group_id=group_id)
-        
-        if journal_entries.exists():
-            # Generate the Excel file
-            wb = generate_excel_journal(journal_entries)
-            # Set the response content type to Excel
-            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            # Set the Content-Disposition header to make the browser treat the response as an attachment
-            response['Content-Disposition'] = f'attachment; filename={force_str(discipline)}.xlsx'
-            # Save the workbook to the response
-            wb.save(response)
-            # Return the response
-            return response
-        else:
-            return render(request, 'preview_journal.html', {'empty_message': 'Нет данных для отображения.'})
+@user_passes_test(lambda u: u.is_staff)
+def preview_journal(request, discipline, group_id):
+    discipline_instance = get_object_or_404(Discipline, id=discipline)
+    journal_entries = JournalEntry.objects.filter(discipline=discipline_instance, student__group_id=group_id).order_by('student').distinct()
+
+    if request.method == 'POST':
+        for entry in journal_entries:
+            year = request.POST.get(f'year_{entry.id}')
+            month = request.POST.get(f'month_{entry.id}')
+            day = request.POST.get(f'day_{entry.id}')
+            mark = request.POST.get(f'grade_{entry.id}')
+
+            if year and year.isdigit():
+                entry.year = int(year)
+            if month and month.isdigit():
+                entry.month = int(month)
+            if day and day.isdigit():
+                entry.day = int(day)
+            if mark and mark.isdigit() and int(mark) in [2, 3, 4, 5]:
+                entry.mark = int(mark)
+
+            entry.save()
+
+        return JsonResponse({'status': 'success'})
+
+    if journal_entries.exists():
+        return render(request, 'preview_journal.html', {'journal_entries': journal_entries, 'discipline': discipline_instance, 'group_id': group_id})
     else:
-        return render(request, 'preview_journal.html', {'error_message': 'Отсутствуют обязательные параметры в URL.'})
+        return render(request, 'preview_journal.html', {'empty_message': 'Нет данных для отображения.'})

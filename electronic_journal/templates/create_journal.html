@@ -6,7 +6,6 @@
 
 {% block content %}
     <style>
-        /* Стили для формы */
         .container {
             margin: 20px;
         }
@@ -24,18 +23,11 @@
             margin-bottom: 10px;
         }
 
-        .container form input[type="text"],
-        .container form input[type="number"] {
+        .container form select,
+        .container form input[type="text"] {
             margin-top: 10px;
             padding: 8px;
             width: 100%;
-            box-sizing: border-box;
-        }
-
-        .container form select {
-            margin-top: 10px;
-            width: 100%;
-            padding: 8px;
             box-sizing: border-box;
         }
 
@@ -50,31 +42,28 @@
         }
     </style>
 
-<div class="container">
-    <h1>Создание журнала</h1>
-    <form method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="discipline">Наименование дисциплины:</label>
-            <input type="text" name="discipline" id="discipline">
-        </div>
-        <div class="form-group">
-            <label for="group">Выберите группу:</label>
-            <select name="group" id="group">
-                {% for group in groups %}
-                    <option value="{{ group.id }}">{{ group.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="day">День:</label>
-            <input type="number" name="day" id="day" min="1" max="31">
-        </div>
-        <div class="form-group">
-            <label for="month">Месяц:</label>
-            <input type="number" name="month" id="month" min="1" max="12">
-        </div>
-        <button type="submit" class="btn btn-primary" formaction="{% url 'preview_journal' %}">Создать журнал</button>
-    </form>
-</div>
+    <div class="container">
+        <h1>Создание журнала</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="discipline">Дисциплина:</label>
+                {{ form.discipline }}
+            </div>
+            <div class="form-group">
+                <label for="group">Группа:</label>
+                {{ form.group }}
+            </div>
+            <div class="form-group">
+                <label for="teacher">Преподаватель:</label>
+                {{ form.teacher }}
+            </div>
+            <button type="submit" class="btn btn-primary">Создать журнал</button>
+        </form>
+        {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+                {{ error_message }}
+            </div>
+        {% endif %}
+    </div>
 {% endblock %}

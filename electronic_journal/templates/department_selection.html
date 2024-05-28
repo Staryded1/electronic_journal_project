@@ -95,7 +95,7 @@
         <a href="{% url 'settings' %}" class="settings-button">Настройки</a>
         <a href="{% url 'grades' %}" class="grades-button">Посмотреть оценки</a>
         {% if is_teacher or is_admin %}
-            <a href="{% url 'mark' %}" class="mark-button">Выставить оценки</a>
+            <a href="{% url 'department_selection' %}" class="mark-button">Выставить оценки</a>
         {% endif %}
     </header>
     <main>
