@@ -1,6 +1,7 @@
 from django import forms
-from .models import Specialty, Group, Student, Teacher, Discipline
+from .models import Lesson, Specialty, Group, Student, Teacher, Discipline
 from django.contrib.auth.models import User
+from .models import JournalEntry
 
 class SpecialtyForm(forms.ModelForm):
     class Meta:
@@ -29,11 +30,22 @@ class TeacherForm(forms.ModelForm):
         model = Teacher
         fields = ['first_name', 'last_name', 'email', 'disciplines']
 
-  
 class JournalCreationForm(forms.Form):
-    discipline = forms.ModelChoiceField(queryset=Discipline.objects.all(), required=True, label="Дисциплина")
-    group = forms.ModelChoiceField(queryset=Group.objects.all(), required=True, label="Группа")
-    teacher = forms.ModelChoiceField(queryset=Teacher.objects.all(), required=True, label="Преподаватель")
+    discipline = forms.ModelChoiceField(queryset=Discipline.objects.all(), label='Дисциплина')
+    group = forms.ModelChoiceField(queryset=Group.objects.all(), label='Группа')
+    teacher = forms.ModelChoiceField(queryset=Teacher.objects.all(), label='Преподаватель')
+    month = forms.IntegerField(min_value=1, max_value=12, label='Месяц')
+    year = forms.IntegerField(min_value=1900, max_value=2100, label='Год')
+
+class LessonForm(forms.ModelForm):
+    class Meta:
+        model = Lesson
+        fields = ['date', 'topic', 'description']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'topic': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control'}),
+        }
 
 class DisciplineForm(forms.ModelForm):
     class Meta:
@@ -45,3 +57,15 @@ class DisciplineForm(forms.ModelForm):
         labels = {
             'name': 'Название дисциплины',
         }
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if commit:
+            instance.save()
+            instance.group.set(Group.objects.all())
+            instance.save()
+        return instance
+
+class JournalForm(forms.Form):
+    date = forms.CharField(label='Дата занятия', max_length=10)
+    topic = forms.CharField(label='Название темы', max_length=100)
+    description = forms.CharField(label='Описание темы', widget=forms.Textarea)

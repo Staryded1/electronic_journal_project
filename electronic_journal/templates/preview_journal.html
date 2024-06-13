@@ -1,5 +1,7 @@
 {% extends 'admin_panel.html' %}
 
+{% load custom_filters %}
+
 {% block title %}
     Предварительный просмотр журнала
 {% endblock %}
@@ -7,58 +9,83 @@
 {% block content %}
     <div class="container">
         <h1>Предварительный просмотр журнала</h1>
-        {% if journal_entries %}
-            <form id="journalForm" method="post">
-                {% csrf_token %}
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Студент</th>
-                            <th>Год</th>
-                            <th>Месяц</th>
-                            <th>День</th>
-                            <th>Оценка</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for entry in journal_entries %}
-                            <tr>
-                                <td>{{ entry.student }}</td>
-                                <td>
-                                    <input type="number" name="year_{{ entry.id }}" value="{{ entry.year }}" />
-                                </td>
-                                <td>
-                                    <select name="month_{{ entry.id }}">
-                                        <option value="1" {% if entry.month == 1 %}selected{% endif %}>Январь</option>
-                                        <option value="2" {% if entry.month == 2 %}selected{% endif %}>Февраль</option>
-                                        <option value="3" {% if entry.month == 3 %}selected{% endif %}>Март</option>
-                                        <option value="4" {% if entry.month == 4 %}selected{% endif %}>Апрель</option>
-                                        <option value="5" {% if entry.month == 5 %}selected{% endif %}>Май</option>
-                                        <option value="6" {% if entry.month == 6 %}selected{% endif %}>Июнь</option>
-                                        <option value="7" {% if entry.month == 7 %}selected{% endif %}>Июль</option>
-                                        <option value="8" {% if entry.month == 8 %}selected{% endif %}>Август</option>
-                                        <option value="9" {% if entry.month == 9 %}selected{% endif %}>Сентябрь</option>
-                                        <option value="10" {% if entry.month == 10 %}selected{% endif %}>Октябрь</option>
-                                        <option value="11" {% if entry.month == 11 %}selected{% endif %}>Ноябрь</option>
-                                        <option value="12" {% if entry.month == 12 %}selected{% endif %}>Декабрь</option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <input type="number" name="day_{{ entry.id }}" value="{{ entry.day }}" />
-                                </td>
-                                <td>
-                                    <input type="text" name="grade_{{ entry.id }}" value="{{ entry.mark }}" />
-                                </td>
-                            </tr>
+        <form id="journalForm" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="year">Год</label>
+                <input type="number" id="year" name="year" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="month">Месяц</label>
+                <select id="month" name="month" class="form-control" required>
+                    <option value="1">Январь</option>
+                    <option value="2">Февраль</option>
+                    <option value="3">Март</option>
+                    <option value="4">Апрель</option>
+                    <option value="5">Май</option>
+                    <option value="6">Июнь</option>
+                    <option value="7">Июль</option>
+                    <option value="8">Август</option>
+                    <option value="9">Сентябрь</option>
+                    <option value="10">Октябрь</option>
+                    <option value="11">Ноябрь</option>
+                    <option value="12">Декабрь</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="lesson_topic">Тема занятия</label>
+                <input type="text" id="lesson_topic" name="lesson_topic" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="lesson_description">Описание занятия</label>
+                <textarea id="lesson_description" name="lesson_description" class="form-control" required></textarea>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Студент</th>
+                        {% for day in 1|to:31 %}
+                            <th>{{ day }}</th>
                         {% endfor %}
-                    </tbody>
-                </table>
-                <button type="submit" class="btn btn-primary">Сохранить изменения</button>
-            </form>
-        {% else %}
-            <p>{{ empty_message }}</p>
-        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                        <tr>
+                            <td>{{ student }}</td>
+                            {% for day in 1|to:31 %}
+                                <td>
+                                    <input type="text" name="grade_{{ student.id }}_{{ day }}" class="form-control grade-input">
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-primary custom-btn">Сохранить изменения</button>
+        </form>
     </div>
+
+    <style>
+        .grade-input {
+            width: 50px;
+            padding: 2px;
+            text-align: center;
+        }
+        .custom-btn {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .custom-btn:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+    </style>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -71,7 +98,7 @@
                     if (response.ok) {
                         alert('Журнал успешно сохранен!');
                         window.close();
-                        window.opener.location.reload(); // Перезагрузить страницу с созданием журнала
+                        window.opener.location.reload();
                     } else {
                         alert('Ошибка при сохранении журнала.');
                     }

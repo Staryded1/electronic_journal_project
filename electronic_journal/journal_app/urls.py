@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views 
+from .views import JournalView, JournalExportView
 
 
 
@@ -16,8 +17,10 @@ urlpatterns = [
     path('add_specialty/', views.add_specialty, name='add_specialty'),  # Маршрут для добавления специальности
     path('add_student/', views.add_student, name='add_student'),  # URL-маршрут для добавления студента
     path('add_teacher/', views.add_teacher, name='add_teacher'),
-    path('group_selection/', views.group_selection, name='group_selection'),  # Добавляем этот URL-шаблон
+    path('group_selection/', views.group_selection, name='group_selection'),
+    path('discipline-selection/<int:group_id>/', views.discipline_selection, name='discipline_selection'),
     path('create-journal/', views.create_journal, name='create_journal'),
-    path('preview-journal/<int:discipline>/<int:group_id>/', views.preview_journal, name='preview_journal'),
     path('add_discipline/', views.add_discipline, name='add_discipline'),
+    path('journal/', JournalView.as_view(), name='journal'),
+    path('journal/export/', JournalExportView.as_view(), name='journal_export'),
 ]

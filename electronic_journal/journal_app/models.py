@@ -30,6 +30,7 @@ class Student(models.Model):
     
 class Discipline(models.Model):
     name = models.CharField(max_length=100)
+    group = models.ManyToManyField(Group)
 
     def __str__(self):
         return self.name
@@ -44,16 +45,26 @@ class Teacher(models.Model):
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
+    
+
+
+class Lesson(models.Model):
+    date = models.DateField(null=True, blank=True)  # Позволяет null и пустое значение
+    topic = models.CharField(max_length=255)
+    description = models.TextField()
+    discipline = models.ForeignKey(Discipline, on_delete=models.CASCADE)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.topic} ({self.date})'
 
 
 class JournalEntry(models.Model):
-    discipline = models.ForeignKey(Discipline, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    discipline = models.ForeignKey(Discipline, on_delete=models.CASCADE)
     day = models.IntegerField(null=True, blank=True)
-    month = models.IntegerField(null=True, blank=True)
-    year = models.IntegerField(null=True, blank=True)
-    mark = models.IntegerField(null=True, blank=True)
-
-    def __str__(self):
-        return f'{self.student} - {self.discipline}'
+    month = models.IntegerField()
+    year = models.IntegerField()
+    mark = models.CharField(max_length=5)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    lesson = models.ForeignKey(Lesson, on_delete=models.SET_NULL, null=True, blank=True)  # Allow null and blank

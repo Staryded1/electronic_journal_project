@@ -15,7 +15,7 @@ from .forms import GroupForm, StudentForm
 import random
 import string
 import pandas as pd
-from .models import Student
+from .models import Student,  Lesson
 import transliterate
 from journal_app.models import Group
 import re
@@ -29,6 +29,15 @@ from openpyxl import Workbook
 from django.http import HttpResponse
 from django.utils.encoding import force_str
 from django.contrib.auth.decorators import user_passes_test
+from .models import Specialty, Group, Discipline
+from datetime import datetime
+import calendar
+from calendar import monthrange
+from django.views import View
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
+from .forms import JournalForm
+from django.views.generic import FormView, ListView
 
 
 
@@ -112,22 +121,166 @@ def department_selection(request):
     # Отображение страницы выбора специальности
     return render(request, 'department_selection.html', {'specialties': specialties, 'is_teacher': is_teacher, 'is_admin': is_admin})
 
+@login_required
 def group_selection(request):
     is_teacher = request.user.groups.filter(name='teacher').exists()
     is_admin = request.user.groups.filter(name='admin').exists()
-    selected_specialty_id = None
-    groups = None
     
     if request.method == 'POST':
-        selected_specialty_id = request.POST.get('specialty')  # Получаем идентификатор выбранной специальности из POST-запроса
-        if selected_specialty_id:
-            selected_specialty = get_object_or_404(Specialty, code=selected_specialty_id)  # Получаем объект выбранной специальности или 404, если не найден
-            groups = selected_specialty.group_set.all()  # Получаем все группы, связанные с выбранной специальностью
-    
+        selected_group_id = request.POST.get('group')
+        if selected_group_id:
+            return redirect('discipline_selection', group_id=selected_group_id)
+
+    groups = Group.objects.all()
     return render(request, 'group_selection.html', {'is_teacher': is_teacher, 'is_admin': is_admin, 'groups': groups})
 
+@login_required
+def discipline_selection(request, group_id):
+    is_teacher = request.user.groups.filter(name='teacher').exists()
+    is_admin = request.user.groups.filter(name='admin').exists()
 
+    group = get_object_or_404(Group, id=group_id)
+    
+    teacher = None
+    if is_teacher:
+        teacher = get_object_or_404(Teacher, user=request.user)
 
+    if teacher:
+        disciplines = Discipline.objects.filter(teachers=teacher, group=group)
+    else:
+        disciplines = Discipline.objects.filter(group=group)
+
+    if request.method == 'POST':
+        selected_discipline_id = request.POST.get('discipline')
+        selected_month = request.POST.get('month')
+        selected_year = request.POST.get('year')
+
+        if selected_discipline_id and selected_month and selected_year:
+            return redirect(f'/journal/?discipline_id={selected_discipline_id}&group_id={group_id}&month={selected_month}&year={selected_year}')
+
+    current_year = datetime.now().year
+    years = list(range(current_year - 5, current_year + 1))
+    months = [
+        (1, "Январь"), (2, "Февраль"), (3, "Март"), (4, "Апрель"), (5, "Май"), (6, "Июнь"),
+        (7, "Июль"), (8, "Август"), (9, "Сентябрь"), (10, "Октябрь"), (11, "Ноябрь"), (12, "Декабрь")
+    ]
+    return render(request, 'discipline_selection.html', {
+        'is_teacher': is_teacher,
+        'is_admin': is_admin,
+        'disciplines': disciplines,
+        'years': years,
+        'months': months,
+        'group': group,
+    })
+
+class JournalView(LoginRequiredMixin, FormView):
+    template_name = 'journal_view.html'
+    form_class = JournalForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        discipline_id = self.request.GET.get('discipline_id')
+        group_id = self.request.GET.get('group_id')
+        year = int(self.request.GET.get('year'))
+        month = int(self.request.GET.get('month'))
+
+        context['discipline'] = get_object_or_404(Discipline, id=discipline_id)
+        context['group'] = get_object_or_404(Group, id=group_id)
+        context['year'] = year
+        context['month'] = month
+        context['days'] = [day for day in range(1, 32)]
+        context['students'] = Student.objects.filter(group=context['group'])
+        context['journal_entries'] = JournalEntry.objects.filter(
+            discipline=context['discipline'], 
+            student__in=context['students'], 
+            year=year, 
+            month=month
+        ).select_related('student', 'lesson')
+        context['is_teacher'] = self.request.user.groups.filter(name='teacher').exists()
+        context['is_admin'] = self.request.user.is_superuser
+
+        context['existing_months'] = JournalEntry.objects.filter(
+            discipline=context['discipline'],
+            student__in=context['students'],
+            year=year
+        ).values_list('month', flat=True).distinct()
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        discipline_id = self.request.GET.get('discipline_id')
+        group_id = self.request.GET.get('group_id')
+        year = int(self.request.GET.get('year'))
+        month = int(self.request.GET.get('month'))
+
+        discipline = get_object_or_404(Discipline, id=discipline_id)
+        group = get_object_or_404(Group, id=group_id)
+        students = Student.objects.filter(group=group)
+        days = [day for day in range(1, 32)]
+        teacher = get_object_or_404(Teacher, user=request.user)
+
+        errors = []
+        success_count = 0
+
+        for student in students:
+            for day in days:
+                mark_key = f'mark_{student.id}_{day}'
+                mark = request.POST.get(mark_key)
+                if mark:
+                    try:
+                        entry, created = JournalEntry.objects.get_or_create(
+                            student=student,
+                            discipline=discipline,
+                            day=day,
+                            month=month,
+                            year=year,
+                            defaults={'mark': mark, 'teacher': teacher}
+                        )
+                        if not created:
+                            entry.mark = mark
+                            entry.save()
+                        success_count += 1
+                    except Exception as e:
+                        errors.append(f"Ошибка при сохранении оценки для студента {student.id} на день {day}: {e}")
+
+        if errors:
+            messages.error(request, 'Произошли ошибки при сохранении оценок: ' + ', '.join(errors))
+        else:
+            messages.success(request, f'Оценки успешно сохранены.')
+
+        return redirect(f'/journal/?discipline_id={discipline.id}&group_id={group.id}&year={year}&month={month}')
+
+class JournalExportView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        discipline_id = request.GET.get('discipline_id')
+        group_id = request.GET.get('group_id')
+        year = int(request.GET.get('year'))
+        month = int(request.GET.get('month'))
+
+        discipline = get_object_or_404(Discipline, id=discipline_id)
+        group = get_object_or_404(Group, id=group_id)
+        students = Student.objects.filter(group=group)
+        journal_entries = JournalEntry.objects.filter(
+            discipline=discipline, 
+            student__in=students, 
+            year=year, 
+            month=month
+        )
+
+        data = []
+        for student in students:
+            student_data = [student.name]
+            for day in range(1, 32):
+                entry = journal_entries.filter(student=student, day=day).first()
+                student_data.append(entry.mark if entry else '')
+            data.append(student_data)
+
+        df = pd.DataFrame(data, columns=['Студент'] + [str(day) for day in range(1, 32)])
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename="journal_{year}_{month}.xlsx"'
+        df.to_excel(response, index=False)
+        return response
+    
 @staff_member_required
 def admin_panel(request):
     return render(request, 'admin_panel.html')
@@ -336,7 +489,7 @@ def generate_excel_journal(journal_entries):
 
     return wb
 
-@user_passes_test(lambda u: u.is_staff)
+@staff_member_required
 def create_journal(request):
     groups = Group.objects.all()
 
@@ -346,10 +499,21 @@ def create_journal(request):
             discipline = form.cleaned_data['discipline']
             group = form.cleaned_data['group']
             teacher = form.cleaned_data['teacher']
+            month = form.cleaned_data['month']
+            year = form.cleaned_data['year']
             students = group.student_set.all()
 
             # Удаляем существующие записи для предотвращения дублирования
-            JournalEntry.objects.filter(discipline=discipline, student__in=students).delete()
+            JournalEntry.objects.filter(discipline=discipline, student__in=students, month=month, year=year).delete()
+
+            # Создание урока по умолчанию, если его еще нет
+            lesson, created = Lesson.objects.get_or_create(
+                date='2023-01-01',
+                topic='Default Lesson',
+                description='This is a default lesson.',
+                discipline=discipline,
+                teacher=teacher
+            )
 
             # Создаем новые записи с значениями по умолчанию
             for student in students:
@@ -357,47 +521,17 @@ def create_journal(request):
                     discipline=discipline,
                     student=student,
                     teacher=teacher,
-                    day=1,  # Значение по умолчанию для day
-                    month=1,  # Значение по умолчанию для month
-                    year=2023,  # Значение по умолчанию для year
-                    mark=0  # Значение по умолчанию для mark
+                    mark=0,
+                    lesson=lesson,
+                    month=month,
+                    year=year
                 )
 
-            # Перенаправляем на страницу предварительного просмотра журнала
-            return redirect(reverse('preview_journal', kwargs={'discipline': discipline.id, 'group_id': group.id}))
+            # Перенаправляем на страницу административной панели
+            return redirect(reverse('admin_panel'))  # Или другая страница, куда нужно перенаправить
         else:
             return render(request, 'create_journal.html', {'form': form, 'groups': groups, 'error_message': 'Форма невалидна.'})
     else:
         form = JournalCreationForm()
 
     return render(request, 'create_journal.html', {'form': form, 'groups': groups})
-
-@user_passes_test(lambda u: u.is_staff)
-def preview_journal(request, discipline, group_id):
-    discipline_instance = get_object_or_404(Discipline, id=discipline)
-    journal_entries = JournalEntry.objects.filter(discipline=discipline_instance, student__group_id=group_id).order_by('student').distinct()
-
-    if request.method == 'POST':
-        for entry in journal_entries:
-            year = request.POST.get(f'year_{entry.id}')
-            month = request.POST.get(f'month_{entry.id}')
-            day = request.POST.get(f'day_{entry.id}')
-            mark = request.POST.get(f'grade_{entry.id}')
-
-            if year and year.isdigit():
-                entry.year = int(year)
-            if month and month.isdigit():
-                entry.month = int(month)
-            if day and day.isdigit():
-                entry.day = int(day)
-            if mark and mark.isdigit() and int(mark) in [2, 3, 4, 5]:
-                entry.mark = int(mark)
-
-            entry.save()
-
-        return JsonResponse({'status': 'success'})
-
-    if journal_entries.exists():
-        return render(request, 'preview_journal.html', {'journal_entries': journal_entries, 'discipline': discipline_instance, 'group_id': group_id})
-    else:
-        return render(request, 'preview_journal.html', {'empty_message': 'Нет данных для отображения.'})
