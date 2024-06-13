@@ -165,7 +165,7 @@
                         <tbody>
                             {% for student in students %}
                                 <tr>
-                                    <td>{{ student.full_name }}</td>
+                                    <td>{{ student.last_name }} {{ student.first_name }} {{ student.middle_name }}</td>
                                     {% for day in days %}
                                         {% get_entry journal_entries student.id day as journal_entry %}
                                         <td>
