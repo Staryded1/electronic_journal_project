@@ -167,9 +167,8 @@
                                 <tr>
                                     <td>{{ student.last_name }} {{ student.first_name }} {{ student.middle_name }}</td>
                                     {% for day in days %}
-                                        {% get_entry journal_entries student.id day as journal_entry %}
                                         <td>
-                                            <input type="text" name="mark_{{ student.id }}_{{ day }}" class="mark-input" value="{% if journal_entry %}{{ journal_entry.mark }}{% endif %}">
+                                            <input type="text" name="mark_{{ student.id }}_{{ day }}" value="{% get_student_mark journal_entries student.id day %}" class="mark-input" maxlength="5">
                                         </td>
                                     {% endfor %}
                                 </tr>

@@ -267,18 +267,28 @@ class JournalExportView(LoginRequiredMixin, View):
             month=month
         )
 
+        # Получение количества дней в месяце
+        _, num_days = calendar.monthrange(year, month)
+
         data = []
         for student in students:
-            student_data = [student.name]
-            for day in range(1, 32):
+            student_data = [f"{student.last_name} {student.first_name} {student.middle_name}"]
+            for day in range(1, num_days + 1):
                 entry = journal_entries.filter(student=student, day=day).first()
                 student_data.append(entry.mark if entry else '')
             data.append(student_data)
 
-        df = pd.DataFrame(data, columns=['Студент'] + [str(day) for day in range(1, 32)])
+        df = pd.DataFrame(data, columns=['Студент'] + [str(day) for day in range(1, num_days + 1)])
+        
+        # Запись данных в Excel с настройкой ширины столбца
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = f'attachment; filename="journal_{year}_{month}.xlsx"'
-        df.to_excel(response, index=False)
+        
+        with pd.ExcelWriter(response, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name='Journal')
+            worksheet = writer.sheets['Journal']
+            worksheet.column_dimensions['A'].width = 30  # Задаем ширину столбца 'A' (столбец с ФИО)
+
         return response
     
 @staff_member_required

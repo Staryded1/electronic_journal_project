@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Просмотр оценок</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Посмотреть</button>
+  </form>
+
+  {% if marks %}
+    <h3>Оценки студента {{ student.last_name }} {{ student.first_name }} по дисциплине {{ discipline.name }} за {{ month }}/{{ year }}</h3>
+    <table>
+      <tr>
+        <th>День</th>
+        {% for day in range(1, num_days + 1) %}
+          <th>{{ day }}</th>
+        {% endfor %}
+      </tr>
+      <tr>
+        <th>Оценка</th>
+        {% for mark in marks %}
+          <td>{{ mark }}</td>
+        {% endfor %}
+      </tr>
+    </table>
+  {% endif %}
+{% endblock %}
