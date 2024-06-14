@@ -122,9 +122,13 @@
         <h1><a href="{% url 'dashboard' %}"><img src="/static/64.png"></a></h1>
         <a href="{% url 'logout' %}" class="logout-button">Выйти</a>
         <a href="{% url 'settings' %}" class="settings-button">Настройки</a>
-        <a href="{% url 'grades' %}" class="grades-button">Посмотреть оценки</a>
-        {% if is_teacher or is_admin %}
-            <a href="{% url 'mark' %}" class="mark-button">Выставить оценки</a>
+        {% if request.user.is_authenticated %}
+            {% if is_teacher or is_admin %}
+                <a href="{% url 'teacher_grades' %}" class="grades-button">Посмотреть оценки</a>
+                <a href="{% url 'department_selection' %}" class="mark-button">Выставить оценки</a>
+            {% else %}
+                <a href="{% url 'grades' %}" class="grades-button">Посмотреть оценки</a>
+            {% endif %}
         {% endif %}
     </header>
     <main>

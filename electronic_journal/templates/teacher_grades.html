@@ -1,28 +1,198 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выбор дисциплины</title>
+    <style>
+        body {
+            background-color: #f0f0f0;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        header {
+            background-color: #fff;
+            color: #333;
+            padding: 10px;
+            text-align: left;
+            position: relative;
+        }
+        h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+        h1 a {
+            color: inherit;
+            text-decoration: none;
+        }
+        .logout-button,
+        .settings-button,
+        .grades-button,
+        .mark-button {
+            background-color: #0173b3;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            position: absolute;
+            top: 20px;
+        }
+        .logout-button {
+            right: 20px;
+        }
+        .settings-button {
+            right: 140px;
+        }
+        .grades-button {
+            left: 120px;
+            top: 20px;
+        }
+        .mark-button {
+            left: 310px;
+        }
+        .logout-button:hover,
+        .settings-button:hover,
+        .grades-button:hover,
+        .mark-button:hover {
+            background-color: #005f6b;
+        }
+        .form-container {
+            margin-top: 50px;
+            text-align: center;
+        }
+        .form-label {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .form-select {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            width: 200px;
+        }
+        .submit-button {
+            background-color: #0173b3;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .submit-button:hover {
+            background-color: #005f6b;
+        }
+        .grades-table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 80%;
+        }
+        .grades-table th, .grades-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .grades-table th {
+            background-color: #0173b3;
+            color: white;
+        }
+        .grades-table td {
+            background-color: #fff;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#id_student').prop('disabled', true);
+            $('#id_group').change(function() {
+                var groupId = $(this).val();
+                if (groupId) {
+                    $.ajax({
+                        url: '{% url "load_students" %}',
+                        data: {
+                            'group_id': groupId
+                        },
+                        success: function(data) {
+                            var selectStudent = $('#id_student');
+                            selectStudent.empty();
+                            selectStudent.append('<option value="" selected>---------</option>');
+                            data.forEach(function(student) {
+                                selectStudent.append(
+                                    $('<option></option>').val(student.id).html(student.last_name + ' ' + student.first_name)
+                                );
+                            });
+                            selectStudent.prop('disabled', false);
+                        },
+                        error: function() {
+                            alert('Ошибка загрузки студентов');
+                            $('#id_student').prop('disabled', true);
+                        }
+                    });
+                } else {
+                    $('#id_student').empty();
+                    $('#id_student').prop('disabled', true);
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <h1><a href="{% url 'dashboard' %}"><img src="/static/64.png" alt="Логотип"></a></h1>
+        <a href="{% url 'logout' %}" class="logout-button">Выйти</a>
+        <a href="{% url 'settings' %}" class="settings-button">Настройки</a>
+        {% if request.user.is_authenticated %}
+            {% if is_teacher or is_admin %}
+                <a href="{% url 'teacher_grades' %}" class="grades-button">Посмотреть оценки</a>
+                <a href="{% url 'department_selection' %}" class="mark-button">Выставить оценки</a>
+            {% else %}
+                <a href="{% url 'grades' %}" class="grades-button">Посмотреть оценки</a>
+            {% endif %}
+        {% endif %}
+    </header>
+    <main class="form-container">
+        <form method="post" action="{% url 'teacher_grades' %}">
+            {% csrf_token %}
+            <div>
+                <label for="group" class="form-label">Группа:</label>
+                {{ form.group }}
+            </div>
+            <div>
+                <label for="discipline" class="form-label">Дисциплина:</label>
+                {{ form.discipline }}
+            </div>
+            <div>
+                <label for="student" class="form-label">Студент:</label>
+                {{ form.student }}
+            </div>
+            <button type="submit" class="submit-button">Посмотреть</button>
+        </form>
 
-{% block content %}
-  <h2>Просмотр оценок</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Посмотреть</button>
-  </form>
-
-  {% if marks %}
-    <h3>Оценки студента {{ student.last_name }} {{ student.first_name }} по дисциплине {{ discipline.name }} за {{ month }}/{{ year }}</h3>
-    <table>
-      <tr>
-        <th>День</th>
-        {% for day in range(1, num_days + 1) %}
-          <th>{{ day }}</th>
-        {% endfor %}
-      </tr>
-      <tr>
-        <th>Оценка</th>
-        {% for mark in marks %}
-          <td>{{ mark }}</td>
-        {% endfor %}
-      </tr>
-    </table>
-  {% endif %}
-{% endblock %}
+        {% if marks %}
+            <h3>Оценки студента {{ student.last_name }} {{ student.first_name }} по дисциплине {{ discipline.name }} за {{ month }}/{{ year }}</h3>
+            <table class="grades-table">
+                <tr>
+                    <th>День</th>
+                    {% for day in days_range %}
+                        <th>{{ day }}</th>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <th>Оценка</th>
+                    {% for mark in marks %}
+                        <td>{{ mark }}</td>
+                    {% endfor %}
+                </tr>
+            </table>
+        {% endif %}
+    </main>
+    <footer>
+        <p>&copy; 2024 Electronic Journal</p>
+    </footer>
+</body>
+</html>

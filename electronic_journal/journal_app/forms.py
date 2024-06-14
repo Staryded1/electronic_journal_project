@@ -69,3 +69,14 @@ class JournalForm(forms.Form):
     date = forms.CharField(label='Дата занятия', max_length=10)
     topic = forms.CharField(label='Название темы', max_length=100)
     description = forms.CharField(label='Описание темы', widget=forms.Textarea)
+
+class GradeViewForm(forms.Form):
+    group = forms.ModelChoiceField(queryset=Group.objects.all(), label="Группа")
+    discipline = forms.ModelChoiceField(queryset=Discipline.objects.none(), label="Дисциплина")
+    student = forms.ModelChoiceField(queryset=Student.objects.none(), label="Студент", disabled=True)
+
+    def __init__(self, *args, **kwargs):
+        teacher = kwargs.pop('teacher', None)
+        super().__init__(*args, **kwargs)
+        if teacher:
+            self.fields['discipline'].queryset = Discipline.objects.filter(teachers=teacher)

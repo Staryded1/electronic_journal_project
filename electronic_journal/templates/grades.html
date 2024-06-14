@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Мои оценки</h2>
+  <h3>Оценки за {{ month }}/{{ year }}</h3>
+  {% for discipline, marks in data.items %}
+    <h4>{{ discipline }}</h4>
+    <table>
+      <tr>
+        <th>День</th>
+        {% for day in range(1, num_days + 1) %}
+          <th>{{ day }}</th>
+        {% endfor %}
+      </tr>
+      <tr>
+        <th>Оценка</th>
+        {% for mark in marks %}
+          <td>{{ mark }}</td>
+        {% endfor %}
+      </tr>
+    </table>
+  {% endfor %}
+{% endblock %}

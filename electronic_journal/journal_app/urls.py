@@ -1,26 +1,32 @@
+from django import views
 from django.urls import path
-from . import views 
-from .views import JournalView, JournalExportView
-
-
+from .views import (
+    home, login, dashboard, logout_view, settings, 
+    department_selection, admin_panel, add_group, add_specialty, 
+    add_student, add_teacher, group_selection, discipline_selection, 
+    create_journal, add_discipline, JournalView, JournalExportView, 
+    StudentGradeView, TeacherGradeView, load_students
+)
 
 urlpatterns = [
-    path('', views.home, name='home'),  # Страница home
-    path('login/', views.login, name='login'),  # Страница входа
-    path('dashboard/', views.dashboard, name='dashboard'),  # Страница dashboard
-    path('logout/', views.logout_view, name='logout'),
-    path('grades/', views.grades, name='grades'),
-    path('settings/', views.settings, name='settings'),
-    path('department/', views.department_selection, name='department_selection'),
-    path('admin_panel/', views.admin_panel, name='admin_panel'), 
-    path('add_group/', views.add_group, name='add_group'),
-    path('add_specialty/', views.add_specialty, name='add_specialty'),  # Маршрут для добавления специальности
-    path('add_student/', views.add_student, name='add_student'),  # URL-маршрут для добавления студента
-    path('add_teacher/', views.add_teacher, name='add_teacher'),
-    path('group_selection/', views.group_selection, name='group_selection'),
-    path('discipline-selection/<int:group_id>/', views.discipline_selection, name='discipline_selection'),
-    path('create-journal/', views.create_journal, name='create_journal'),
-    path('add_discipline/', views.add_discipline, name='add_discipline'),
-    path('journal/', JournalView.as_view(), name='journal'),
+    path('', home, name='home'),
+    path('login/', login, name='login'),
+    path('dashboard/', dashboard, name='dashboard'),
+    path('logout/', logout_view, name='logout'),
+    path('settings/', settings, name='settings'),
+    path('department/', department_selection, name='department_selection'),
+    path('admin_panel/', admin_panel, name='admin_panel'),
+    path('add_group/', add_group, name='add_group'),
+    path('add_specialty/', add_specialty, name='add_specialty'),
+    path('add_student/', add_student, name='add_student'),
+    path('add_teacher/', add_teacher, name='add_teacher'),
+    path('group_selection/', group_selection, name='group_selection'),
+    path('discipline-selection/<int:group_id>/', discipline_selection, name='discipline_selection'),
+    path('create-journal/', create_journal, name='create_journal'),
+    path('add_discipline/', add_discipline, name='add_discipline'),
+    path('journal/', JournalView.as_view(), name='journal_view'),
     path('journal/export/', JournalExportView.as_view(), name='journal_export'),
+    path('grades/', StudentGradeView.as_view(), name='grades'),
+    path('teacher_grades/', TeacherGradeView.as_view(), name='teacher_grades'),
+    path('load-students/', load_students, name='load_students'),
 ]

@@ -38,6 +38,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import JournalForm
 from django.views.generic import FormView, ListView
+from .forms import GradeViewForm
 
 
 
@@ -290,6 +291,81 @@ class JournalExportView(LoginRequiredMixin, View):
             worksheet.column_dimensions['A'].width = 30  # Задаем ширину столбца 'A' (столбец с ФИО)
 
         return response
+    
+class TeacherGradeView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        form = GradeViewForm(teacher=request.user.teacher)
+        return render(request, 'teacher_grades.html', {'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = GradeViewForm(request.POST, teacher=request.user.teacher)
+        if form.is_valid():
+            discipline = form.cleaned_data['discipline']
+            student = form.cleaned_data['student']
+            year = request.POST.get('year', datetime.now().year)
+            month = request.POST.get('month', datetime.now().month)
+
+            journal_entries = JournalEntry.objects.filter(
+                discipline=discipline,
+                student=student,
+                year=year,
+                month=month
+            )
+
+            _, num_days = calendar.monthrange(year, month)
+            marks = ['' for _ in range(num_days)]
+            for entry in journal_entries:
+                marks[entry.day - 1] = entry.mark
+
+            context = {
+                'form': form,
+                'marks': marks,
+                'num_days': num_days,
+                'days_range': range(1, num_days + 1),
+                'student': student,
+                'discipline': discipline,
+                'year': year,
+                'month': month
+            }
+            return render(request, 'teacher_grades.html', context)
+        return render(request, 'teacher_grades.html', {'form': form})
+
+def load_students(request):
+    group_id = request.GET.get('group_id')
+    students = Student.objects.filter(group_id=group_id).order_by('last_name')
+    student_list = list(students.values('id', 'last_name', 'first_name'))
+    return JsonResponse(student_list, safe=False)
+    
+class StudentGradeView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        student = request.user.student
+        year = request.GET.get('year', datetime.now().year)
+        month = request.GET.get('month', datetime.now().month)
+        
+        journal_entries = JournalEntry.objects.filter(
+            student=student,
+            year=year,
+            month=month
+        )
+        
+        disciplines = journal_entries.values_list('discipline', flat=True).distinct()
+        data = {}
+        for discipline in disciplines:
+            entries = journal_entries.filter(discipline=discipline)
+            _, num_days = calendar.monthrange(year, month)
+            marks = ['' for _ in range(num_days)]
+            for entry in entries:
+                marks[entry.day - 1] = entry.mark
+            data[discipline] = marks
+
+        context = {
+            'data': data,
+            'num_days': num_days,
+            'student': student,
+            'year': year,
+            'month': month
+        }
+        return render(request, 'grades.html', context)
     
 @staff_member_required
 def admin_panel(request):
