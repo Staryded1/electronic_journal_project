@@ -80,3 +80,19 @@ class GradeViewForm(forms.Form):
         super().__init__(*args, **kwargs)
         if teacher:
             self.fields['discipline'].queryset = Discipline.objects.filter(teachers=teacher)
+
+class TeacherGradesForm(forms.Form):
+    group = forms.ModelChoiceField(queryset=Group.objects.all(), required=True)
+    discipline = forms.ModelChoiceField(queryset=Discipline.objects.all(), required=True)
+    student = forms.ModelChoiceField(queryset=Student.objects.none(), required=True)
+
+    def __init__(self, *args, **kwargs):
+        super(TeacherGradesForm, self).__init__(*args, **kwargs)
+        if 'group' in self.data:
+            try:
+                group_id = int(self.data.get('group'))
+                self.fields['student'].queryset = Student.objects.filter(group_id=group_id).order_by('last_name')
+            except (ValueError, TypeError):
+                pass  # invalid input from the client; ignore and fallback to empty Student queryset
+        elif self.instance.pk:
+            self.fields['student'].queryset = self.instance.group.student_set.order_by('last_name')

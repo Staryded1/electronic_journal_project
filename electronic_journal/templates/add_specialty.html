@@ -5,67 +5,24 @@
 {% endblock %}
 
 {% block content %}
-    <style>
-        .admin-panel {
-            margin: 0 auto;
-            width: 50%;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .form-group input {
-            width: calc(100% - 22px);
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
-            margin-top: 5px;
-        }
-
-        .button-primary {
-            background-color: #007bff;
-            color: #fff;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .output {
-            margin-top: 20px;
-            color: green;
-        }
-    </style>
-    
-    <div class="admin-panel">
+    <div class="form-container">
         <h2>Добавить специальность</h2>
         <form method="post" class="form">
             {% csrf_token %}
             <div class="form-group">
-                <label for="{{ form.name.id_for_label }}">Название специальности:</label>
+                <label for="{{ form.name.id_for_label }}" class="form-label">Название специальности:</label>
                 {{ form.name }}
             </div>
             <div class="form-group">
-                <label for="{{ form.code.id_for_label }}">Код специальности:</label>
+                <label for="{{ form.code.id_for_label }}" class="form-label">Код специальности:</label>
                 {{ form.code }}
             </div>
             <button type="submit" class="button-primary">Добавить</button>
         </form>
-        <div id="credentialsOutput" class="output">
+        <div id="credentialsOutput" class="message-container">
             {% if messages %}
                 {% for message in messages %}
-                    {{ message }}
+                    <div class="message{% if message.tags %} {{ message.tags }}{% endif %}">{{ message }}</div>
                 {% endfor %}
             {% endif %}
         </div>

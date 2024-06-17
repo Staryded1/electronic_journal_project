@@ -15,17 +15,24 @@
         header {
             background-color: #fff;
             color: #333;
-            padding: 10px;
+            padding: 10px 20px;
             text-align: left;
             position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
         }
         h1 {
             font-size: 24px;
             margin: 0;
+            display: flex;
+            align-items: center;
         }
         h1 a {
             color: inherit;
             text-decoration: none;
+            display: flex;
+            align-items: center;
         }
         .logout-button,
         .settings-button,
@@ -33,74 +40,97 @@
         .mark-button {
             background-color: #0173b3;
             color: #fff;
-            padding: 10px 20px;
+            padding: 5px 10px;
             border: none;
             border-radius: 5px;
             text-decoration: none;
-            position: absolute;
-            top: 20px;
-        }
-        .logout-button {
-            right: 20px;
-        }
-        .settings-button {
-            right: 140px;
-        }
-        .grades-button {
-            left: 120px;
-            top: 20px;
-        }
-        .mark-button {
-            left: 310px;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            display: inline-block;
         }
         .logout-button:hover,
         .settings-button:hover,
         .grades-button:hover,
         .mark-button:hover {
             background-color: #005f6b;
+            transform: translateY(-3px);
+        }
+        .button-group {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+        }
+        main {
+            padding: 20px;
+            position: relative;
+            min-height: calc(100vh - 160px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
         }
         .form-container {
-            margin-top: 50px;
+            background-color: #0173b3;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            color: #fff;
             text-align: center;
+            width: 50%;
+            max-width: 600px;
         }
         .form-label {
             font-size: 18px;
             margin-bottom: 10px;
         }
         .form-select {
-            padding: 8px 12px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
+            width: 100%;
+            padding: 10px;
             font-size: 16px;
-        }
-        .submit-button {
-            background-color: #0173b3;
-            color: #fff;
+            margin-bottom: 10px;
             border: none;
             border-radius: 5px;
+        }
+        .submit-button {
+            background-color: #005f6b;
+            color: #fff;
             padding: 10px 20px;
-            font-size: 16px;
+            border: none;
+            border-radius: 5px;
             cursor: pointer;
-            margin-top: 20px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
         }
         .submit-button:hover {
-            background-color: #005f6b;
+            background-color: #004a54;
+            transform: translateY(-3px);
+        }
+        footer {
+            background-color: #0173b3;
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1><a href="{% url 'dashboard' %}"><img src="/static/64.png"></a></h1>
-        <a href="{% url 'logout' %}" class="logout-button">Выйти</a>
-        <a href="{% url 'settings' %}" class="settings-button">Настройки</a>
-        {% if request.user.is_authenticated %}
-            {% if is_teacher or is_admin %}
-                <a href="{% url 'teacher_grades' %}" class="grades-button">Посмотреть оценки</a>
-                <a href="{% url 'department_selection' %}" class="mark-button">Выставить оценки</a>
-            {% else %}
-                <a href="{% url 'grades' %}" class="grades-button">Посмотреть оценки</a>
+        <h1><a href="{% url 'dashboard' %}"><img src="/static/64.png" alt="Logo">Электронный журнал</a></h1>
+        <div class="button-group">
+            {% if request.user.is_authenticated %}
+                {% if is_teacher or is_admin %}
+                    <a href="{% url 'teacher_grades' %}" class="grades-button">Посмотреть оценки</a>
+                    <a href="{% url 'department_selection' %}" class="mark-button">Выставить оценки</a>
+                {% else %}
+                    <a href="{% url 'grades' %}" class="grades-button">Посмотреть оценки</a>
+                {% endif %}
             {% endif %}
-        {% endif %}
+            <a href="{% url 'settings' %}" class="settings-button">Настройки</a>
+            <a href="{% url 'logout' %}" class="logout-button">Выйти</a>
+        </div>
     </header>
     <main>
         <div class="form-container">

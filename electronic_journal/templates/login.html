@@ -6,107 +6,160 @@
 
 {% block content %}
     <style>
-    /* Добавляем стили для формы входа */
-    .login-form-container {
-        max-width: 400px;
-        margin: 50px auto; /* Увеличен верхний отступ для размещения по центру */
-        padding: 20px;
-        border: 1px solid #ccc;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        overflow-y: auto; /* Добавлен скроллинг */
-        height: 400px; /* Ограничение высоты формы для скроллинга */
-    }
+        /* Добавляем стили для формы входа */
+        .login-form-container {
+            max-width: 600px; /* Увеличиваем ширину контейнера формы */
+            margin: 50px auto; /* Центрируем контейнер формы */
+            padding: 30px; /* Увеличиваем внутренние отступы */
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff; /* Белый фон формы */
+            position: relative; /* Относительное позиционирование для анимации */
+            animation: fadeIn 1s ease-in-out; /* Анимация появления */
+        }
 
-    .form-group {
-        margin-bottom: 20px;
-    }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    label {
-        font-weight: bold;
-    }
+        .form-group {
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease-in-out;
+        }
 
-    .form-control {
-        width: calc(100% - 22px); /* Уменьшаем ширину на 22 пикселя, чтобы соответствовать стилю формы регистрации */
-        padding: 10px;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-    }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    .btn-primary {
-        background-color: #007bff;
-        color: #fff;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
 
-    .btn-primary:hover {
-        background-color: #0056b3;
-    }
+        .form-control {
+            width: calc(100% - 20px); /* Увеличиваем ширину полей для ввода */
+            padding: 15px; /* Увеличиваем внутренние отступы */
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box; /* Учитываем отступы и границы в ширине */
+        }
 
-    /* Стили для плашки с контактной информацией */
-    .contact-info {
-        background-color: #0173b3; /* Голубой цвет фона */
-        color: #fff; /* Белый цвет текста */
-        padding: 10px; /* Уменьшено количество отступов */
-        text-align: center;
-        margin-top: 20px; /* Добавлен верхний отступ */
-        font-size: 14px; /* Уменьшен размер шрифта */
-    }
+        .btn-primary {
+            background-color: #007bff;
+            color: #fff;
+            padding: 15px 20px; /* Увеличиваем внутренние отступы */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%; /* Кнопка занимает всю ширину */
+            box-sizing: border-box; /* Учитываем отступы и границы в ширине */
+            animation: bounceIn 1s ease-in-out;
+        }
 
-    /* Скрыть ненужные ссылки */
-    nav {
-        display: none;
-    }
+        @keyframes bounceIn {
+            from {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
 
-    /* Уменьшаем размер подвала */
-    footer {
-        font-size: 14px; /* Уменьшаем размер шрифта */
-    }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
 
-    /* Стили для забытого пароля */
-    .forgot-password {
-        text-align: center;
-        margin-top: 10px; /* Добавлен верхний отступ */
-    }
+        .contact-info {
+            background-color: #0173b3; /* Голубой цвет фона */
+            color: #fff; /* Белый цвет текста */
+            padding: 15px; /* Увеличиваем внутренние отступы */
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            border-radius: 10px; /* Скругленные углы */
+            animation: slideIn 1s ease-in-out; /* Анимация появления */
+        }
 
-    .forgot-password a {
-        color: #0173b3; /* Цвет ссылки */
-        text-decoration: none; /* Убираем подчеркивание */
-    }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
 
-    .forgot-password a:hover {
-        text-decoration: underline; /* Добавляем подчеркивание при наведении */
-    }
+        nav {
+            display: none;
+        }
+
+        footer {
+            font-size: 14px;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .forgot-password a {
+            color: #0173b3;
+            text-decoration: none;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
     </style>
 
-<div class="login-form-container">
-    <h2>Вход</h2>
-    <form method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="username">Логин:</label>
-            <input type="text" id="username" name="username" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="password">Пароль:</label>
-            <input type="password" id="password" name="password" class="form-control" required>
-            <div class="forgot-password">
-                <a>Забыли пароль?</a>
+    <div class="login-form-container">
+        <h2>Вход</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Логин:</label>
+                <input type="text" id="username" name="username" class="form-control" required>
             </div>
-        </div>
-        <button type="submit" class="btn btn-primary">Войти</button>
-    </form>
-</div>
+            <div class="form-group">
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+                <div class="forgot-password">
+                    <a href="#">Забыли пароль?</a>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Войти</button>
+        </form>
+    </div>
 
-<div class="contact-info">
-    <h2>Контактная информация</h2>
-    <p>Телефон: +123456789</p>
-    <p>Email: info@example.com</p>
-    <p>Адрес: г. Новосибирск, ул. Красный проспект, д. 72</p>
-</div>
+    <div class="contact-info">
+        <h2>Контактная информация</h2>
+        <p>Телефон: +123456789</p>
+        <p>Email: info@example.com</p>
+        <p>Адрес: г. Новосибирск, ул. Красный проспект, д. 72</p>
+    </div>
 
 {% endblock %}

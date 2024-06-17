@@ -38,7 +38,8 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import JournalForm
 from django.views.generic import FormView, ListView
-from .forms import GradeViewForm
+from .forms import GradeViewForm, TeacherGradesForm
+from django.contrib.auth.hashers import make_password
 
 
 
@@ -76,42 +77,45 @@ def grades(request):
 def settings(request):
     user = request.user
 
+    # Проверка, является ли пользователь преподавателем или администратором
+    is_teacher = request.user.groups.filter(name='teacher').exists()
+    is_admin = request.user.groups.filter(name='admin').exists()
+
     if request.method == 'POST':
         # Обработка POST-запроса при отправке формы
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         email = request.POST.get('email')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
 
         # Сохранение изменений в профиле пользователя
         if first_name and last_name and email:  # Проверяем, были ли предоставлены все поля
             user.first_name = first_name
             user.last_name = last_name
             user.email = email
+            if password and password == confirm_password:
+                user.set_password(password)
             user.save()
             messages.success(request, 'Настройки профиля успешно сохранены.')
             return redirect(reverse('settings'))
 
-    return render(request, 'settings.html', {'user': user})
-        
-    # Проверка, является ли пользователь преподавателем или администратором
-    is_teacher = request.user.groups.filter(name='teacher').exists()
-    is_admin = request.user.groups.filter(name='admin').exists()
-    
-    # Отображение страницы настроек
-    return render(request, 'settings.html', {'user': request.user, 'is_teacher': is_teacher, 'is_admin': is_admin})
+    return render(request, 'settings.html', {
+        'user': user,
+        'is_teacher': is_teacher,
+        'is_admin': is_admin
+    })
 
 def logout_view(request):
     logout(request)
     return redirect('home')
-
-
 
 @login_required
 def department_selection(request):
     is_teacher = request.user.groups.filter(name='teacher').exists()
     is_admin = request.user.groups.filter(name='admin').exists()
     
-    # Get specialties from the database
+   
     specialties = Specialty.objects.all()
     
     # Обработка POST-запроса
@@ -330,11 +334,48 @@ class TeacherGradeView(LoginRequiredMixin, View):
             return render(request, 'teacher_grades.html', context)
         return render(request, 'teacher_grades.html', {'form': form})
 
+def teacher_grades(request):
+    form = TeacherGradesForm(request.POST or None)
+    journal_entries = None
+    student = None
+    discipline = None
+    month = None
+    year = None
+    days_range = range(1, 32)
+
+    is_teacher = request.user.groups.filter(name='teacher').exists()
+    is_admin = request.user.groups.filter(name='admin').exists()
+
+    if request.method == 'POST' and form.is_valid():
+        group = form.cleaned_data['group']
+        discipline = form.cleaned_data['discipline']
+        student = form.cleaned_data['student']
+        month = int(request.POST.get('month'))
+        year = int(request.POST.get('year'))
+
+        journal_entries = JournalEntry.objects.filter(
+            student=student,
+            discipline=discipline,
+            month=month,
+            year=year
+        ).order_by('day')
+
+    return render(request, 'teacher_grades.html', {
+        'form': form,
+        'journal_entries': journal_entries,
+        'student': student,
+        'discipline': discipline,
+        'month': month,
+        'year': year,
+        'days_range': days_range,
+        'is_teacher': is_teacher,
+        'is_admin': is_admin,
+    })
+
 def load_students(request):
     group_id = request.GET.get('group_id')
     students = Student.objects.filter(group_id=group_id).order_by('last_name')
-    student_list = list(students.values('id', 'last_name', 'first_name'))
-    return JsonResponse(student_list, safe=False)
+    return JsonResponse(list(students.values('id', 'first_name', 'last_name')), safe=False)
     
 class StudentGradeView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
@@ -503,12 +544,13 @@ def generate_unique_login(first_name, last_name, group_name):
             last_length += 1
 
 def generate_password():
-    # Генерация случайного пароля средней сложности
-    # Пароль будет содержать буквы верхнего и нижнего регистра, цифры и специальные символы
-    password_length = 10
-    characters = string.ascii_letters + string.digits + string.punctuation
-    password = ''.join(random.choice(characters) for i in range(password_length))
-    return password
+    return make_password('Passw0rd')
+
+# Пример использования функции
+def add_user(username):
+    hashed_password = generate_password()
+    new_user = User.objects.create_user(username=username, password=hashed_password)
+    new_user.save()
 
 
 @staff_member_required
